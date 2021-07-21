@@ -1,0 +1,27 @@
+---
+- hosts: k8s
+  vars:
+    helm_chart_url: "https://charts.bitnami.com/bitnami"
+  tasks:
+    - name: Install docker
+      yum:
+        name: docker
+	state: present
+    - name: Start docker
+      service:
+        name: docker
+        state: started
+	enabled: yes
+    - name: Add helm repo
+      kubernetes.core.helm_repository:
+        name: bitnami
+    	repo_url: "{{ helm_chart_url }}"
+    - name: Install Nginx Chart
+      kubernetes.core.helm:
+        name: nginx-server
+    	namespace: testing
+    	chart_ref: bitnami/nginx
+	- name: Gather information about nginx-server
+      kubernetes.core.helm_info:
+        name: nginx-server
+    	release_namespace: testing
